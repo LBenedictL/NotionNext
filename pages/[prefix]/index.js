@@ -1,5 +1,6 @@
 import BLOG from '@/blog.config'
 import useNotification from '@/components/Notification'
+import OpenWrite from '@/components/OpenWrite'
 import { siteConfig } from '@/lib/config'
 import { getGlobalData, getPost, getPostBlocks } from '@/lib/db/getSiteData'
 import { useGlobal } from '@/lib/global'
@@ -95,8 +96,12 @@ const Slug = props => {
   })
   return (
     <>
+      {/* 文章布局 */}
       <Layout {...props} />
+      {/* 解锁密码提示框 */}
       {post?.password && post?.password !== '' && !lock && <Notification />}
+      {/* 导流工具 */}
+      <OpenWrite />
     </>
   )
 }
@@ -124,7 +129,7 @@ export async function getStaticProps({ params: { prefix }, locale }) {
   let fullSlug = prefix
   const from = `slug-props-${fullSlug}`
   const props = await getGlobalData({ from, locale })
-  if (siteConfig('PSEUDO_STATIC', BLOG.PSEUDO_STATIC, props.NOTION_CONFIG)) {
+  if (siteConfig('PSEUDO_STATIC', false, props.NOTION_CONFIG)) {
     if (!fullSlug.endsWith('.html')) {
       fullSlug += '.html'
     }
@@ -134,7 +139,7 @@ export async function getStaticProps({ params: { prefix }, locale }) {
   props.post = props?.allPages?.find(p => {
     return (
       p.type.indexOf('Menu') < 0 &&
-      (p.slug === fullSlug || p.id === idToUuid(fullSlug))
+      (p.slug === prefix || p.id === idToUuid(prefix))
     )
   })
 
@@ -151,11 +156,13 @@ export async function getStaticProps({ params: { prefix }, locale }) {
     props.post = null
     return {
       props,
-      revalidate: siteConfig(
-        'REVALIDATE_SECOND',
-        BLOG.NEXT_REVALIDATE_SECOND,
-        props.NOTION_CONFIG
-      )
+      revalidate: process.env.EXPORT
+        ? undefined
+        : siteConfig(
+            'NEXT_REVALIDATE_SECOND',
+            BLOG.NEXT_REVALIDATE_SECOND,
+            props.NOTION_CONFIG
+          )
     }
   }
 
@@ -191,11 +198,13 @@ export async function getStaticProps({ params: { prefix }, locale }) {
   delete props.allPages
   return {
     props,
-    revalidate: siteConfig(
-      'NEXT_REVALIDATE_SECOND',
-      BLOG.NEXT_REVALIDATE_SECOND,
-      props.NOTION_CONFIG
-    )
+    revalidate: process.env.EXPORT
+      ? undefined
+      : siteConfig(
+          'NEXT_REVALIDATE_SECOND',
+          BLOG.NEXT_REVALIDATE_SECOND,
+          props.NOTION_CONFIG
+        )
   }
 }
 

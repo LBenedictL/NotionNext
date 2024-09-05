@@ -57,12 +57,10 @@ export default function CustomContextMenu(props) {
     }
 
     /**
-     * 鼠标点击事件
+     * 鼠标点击即关闭菜单
      */
     const handleClick = event => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShow(false)
-      }
+      setShow(false)
     }
 
     window.addEventListener('contextmenu', handleContextMenu)
@@ -88,7 +86,6 @@ export default function CustomContextMenu(props) {
 
   function handleScrollTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    setShow(false)
   }
 
   function handleCopyLink() {
@@ -96,12 +93,12 @@ export default function CustomContextMenu(props) {
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        console.log('页面地址已复制')
+        // console.log('页面地址已复制')
+        alert(`${locale.COMMON.PAGE_URL_COPIED} : ${url}`)
       })
       .catch(error => {
         console.error('复制页面地址失败:', error)
       })
-    setShow(false)
   }
 
   /**
@@ -120,18 +117,18 @@ export default function CustomContextMenu(props) {
   function handleCopy() {
     const selectedText = document.getSelection().toString()
     if (selectedText) {
-      const tempInput = document.createElement('input')
-      tempInput.value = selectedText
-      document.body.appendChild(tempInput)
-      tempInput.select()
-      document.execCommand('copy')
-      document.body.removeChild(tempInput)
+      const tempInput = document.createElement('input');
+      tempInput.value = selectedText;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      if (tempInput && tempInput.parentNode && tempInput.parentNode.contains(tempInput)) {
+        tempInput.parentNode.removeChild(tempInput);
+      }
       // alert("Text copied: " + selectedText);
     } else {
       // alert("Please select some text first.");
     }
-
-    setShow(false)
   }
 
   function handleChangeDarkMode() {
